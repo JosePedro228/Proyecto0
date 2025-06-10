@@ -27,13 +27,19 @@ protected:
 
 	void AndarPuppet();
 
+	void AtacarPuppet();
+
+	float Vida= 100.f;
+
+	FTimerHandle TimerHandle3;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* CameraPersonagem;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CameraBoom")
 	class USpringArmComponent* SpringArmCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Mesh")
 	class USkeletalMeshComponent* CharacterMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Target")
@@ -47,14 +53,29 @@ protected:
 
 	FRotator RotacaoInicialD;
 
+	UFUNCTION()
+	void CarregarLoseMenu();
+
+
 public:		
 	class AMyPuppet* PuppetPlayer;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class AArma* ArmaPlayer;
 	UFUNCTION()
 	FHitResult HitResu();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bEstaMorto;
+
+	void SetVida(float Dano);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> HealthWidgetClass;
+
+	UUserWidget* HealthWidget;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

@@ -51,7 +51,7 @@ void ABotIAController::OnSeePawn(APawn* SensedPawn)
 {
 	if (BlackboardComp && SensedPawn)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Eu estou te Vendo"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Eu estou te Vendo"));
 
 		//aqui setamos a variável do BlackBoard Inimigo com o valor do objeto
 		//SensedPawn: Este objeto é o retornado quando o game está em execução

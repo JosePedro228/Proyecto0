@@ -5,7 +5,6 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Estacas.h"
-#include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/SkeletalMesh.h"
 #include "Components/ArrowComponent.h"
@@ -26,7 +25,7 @@ AArma::AArma()
 
     SDisparo = nullptr;
 
-	ConstructorHelpers::FObjectFinder<USkeletalMesh>MalhaDaArma(TEXT("/Script/Engine.SkeletalMesh'/Game/Mesh/Weapons/Rifle.Rifle'"));
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>MalhaDaArma(TEXT("/Script/Engine.SkeletalMesh'/Game/Mesh/Weapons/Besta/Crossbow.Crossbow'"));
 
 	if (MalhaDaArma.Succeeded())
 	{
@@ -99,7 +98,7 @@ void AArma::Fire()
             }
         }
         bPodeAtirar = false;
-        GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AArma::FireRate, 0.25f, false);
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AArma::FireRate, 0.28f, false);
 
     }
 

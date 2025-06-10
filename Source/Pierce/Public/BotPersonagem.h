@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+class AMyGameMode; // Forward declaration to avoid circular dependency
 #include "BotPersonagem.generated.h"
 
 UCLASS()
@@ -18,29 +19,69 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UPROPERTY(EditAnywhere, Category = "Arma")
-	TSubclassOf<class AArma> BP_Arma;
 
 	UPROPERTY(EditAnywhere, Category = "Health")
 	float Health;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Health")
-	bool bEstaMorto;
+	AMyGameMode* GameMode;
+
+	FTimerHandle TimerHandle;
+
+	FTimerHandle TimerHandle1;
+
+	FTimerHandle TimerHandle2;
+
+	FTimerHandle TimerHandle3;
+
+	void AutoDestroir();
+
+	void VelocidadeDeAtaque();
+
+	void Desparalisar();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	class AArma* ArmaInimigo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bEstaMorto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPodeAtacar;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHitEspada;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHitBesta;
+
+	UFUNCTION()
+	void AttackMelee();
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackRange = 2.0f; // Alcance do ataque corpo a corpo
 
 	UFUNCTION()
 	void SetHealth(float Dano);
 
 	UFUNCTION()
-	float GetHealth();
+	void ConjurarAtaque();
 
 	UFUNCTION()
-	bool IsEstaMorto();
+	void HitBesta();
+
+	UFUNCTION()
+	void HitEspada();
+
+	bool bEuContinuomMorto = true;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	class USoundBase* SAtaqueZombie;
+
+	int32 Valor;
 };

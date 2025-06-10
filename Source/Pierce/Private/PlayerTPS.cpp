@@ -18,6 +18,9 @@
 #include "Engine/TargetPoint.h"
 #include "Arma.h"
 #include "MyPuppet.h"
+#include "Blueprint/UserWidget.h" 
+#include "WBP_PlayerHealth.h"
+#include "Engine/TimerHandle.h"
 
 // Sets default values
 APlayerTPS::APlayerTPS()
@@ -25,7 +28,7 @@ APlayerTPS::APlayerTPS()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SpringArmCamera = CreateDefaultSubobject<USpringArmComponent>(FName("SpringArm"));
-	SpringArmCamera->TargetArmLength = 200.f;
+	SpringArmCamera->TargetArmLength = 300.f;
 	SpringArmCamera->AddRelativeLocation(FVector(0.f, 40.f, 50.f));
 	SpringArmCamera->bEnableCameraLag = true;
 	SpringArmCamera->CameraLagSpeed = 40.f;
@@ -40,7 +43,6 @@ APlayerTPS::APlayerTPS()
 	CameraPersonagem->SetupAttachment(SpringArmCamera);
 
 	CharacterMesh = GetMesh();
-
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	Movimentacao = CreateDefaultSubobject<ATargetPoint>(FName("Direita"));
@@ -57,6 +59,7 @@ void APlayerTPS::BeginPlay()
 	PlayerController->bEnableClickEvents = false;
 	PlayerController->bEnableMouseOverEvents = false;
 
+
 	Super::BeginPlay();
 	FActorSpawnParameters Parametros;
 	Parametros.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -64,8 +67,39 @@ void APlayerTPS::BeginPlay()
 	ArmaPlayer = GetWorld()->SpawnActor<AArma>(BP_Arma, FTransform(), Parametros);
 	ArmaPlayer->AttachToComponent(Cast<USceneComponent>(GetMesh()), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("SocketDaArma"));
 
-	PuppetPlayer = GetWorld()->SpawnActor<AMyPuppet>(BP_MyPuppet, FTransform());
+	// Obtém a localização atual do jogador
+	FVector PlayerLocation = GetActorLocation();
+
+
+	FVector SpawnOffset = FVector(20.f, 0.f, 0.f);
+
+
+	FVector SpawnLocation = PlayerLocation + SpawnOffset;
+
+
+	FRotator SpawnRotation = GetActorRotation();
+
+
+	FTransform SpawnTransform(SpawnRotation, SpawnLocation);
+
+	PuppetPlayer = GetWorld()->SpawnActor<AMyPuppet>(BP_MyPuppet, SpawnTransform);
 	
+	bEstaMorto = false;
+
+	if (HealthWidgetClass) // UPROPERTY com TSubclassOf<UUserWidget>
+	{
+		HealthWidget = CreateWidget<UUserWidget>(GetWorld(), HealthWidgetClass);
+		if (HealthWidget)
+		{
+			HealthWidget->AddToViewport();
+		}
+	}
+
+	auto* HealthBar = Cast<UWBP_PlayerHealth>(HealthWidget);
+	if (HealthBar)
+	{
+		HealthBar->SetHealthPercent(Vida / 100.f);
+	}
 }
 void APlayerTPS::MoverParaFrente(float Valor)
 {
@@ -87,11 +121,43 @@ void APlayerTPS::AndarPuppet()
 	PuppetPlayer->MoveToClickLocation();
 }
 
+void APlayerTPS::AtacarPuppet()
+{
+	PuppetPlayer->ConjurarAtaque();
+}
+
 FHitResult APlayerTPS::HitResu()
 {
 	FHitResult hitResult;
 	GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hitResult);
 	return hitResult;
+}
+
+void APlayerTPS::SetVida(float Dano)
+{
+	Vida = Vida - Dano;
+	if (Vida <= 0)
+	{
+		bEstaMorto = true;
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		if (PlayerController)
+		{
+			DisableInput(PlayerController);
+		}
+		CarregarLoseMenu();
+		UE_LOG(LogTemp, Warning, TEXT("Player Morto"));
+	}
+	auto* HealthBar = Cast<UWBP_PlayerHealth>(HealthWidget);
+	if (HealthBar)
+	{
+		HealthBar->SetHealthPercent(Vida / 100.f);
+	}
+
+}
+
+void APlayerTPS::CarregarLoseMenu()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), FName("LoseMenu"));
 }
 
 // Called every frame
@@ -133,7 +199,7 @@ void APlayerTPS::GetMouseLocation()
 	//UE_LOG(LogTemp, Warning, TEXT("Mouse Location: X=%f, Y=%f, Z=%f"), hitLoc.X, hitLoc.Y, hitLoc.Z);
 	
 	//in the end, we set it;
-	if (hitLoc.X<= this->GetActorLocation().X -25 || hitLoc.X >= this->GetActorLocation().X + 25 && hitLoc.Y <= this->GetActorLocation().Y - 25 || hitLoc.Y >= this->GetActorLocation().Y + 25)
+	if (hitLoc.X<= this->GetActorLocation().X -25 || hitLoc.X >= this->GetActorLocation().X + 25 && hitLoc.Y <= this->GetActorLocation().Y - 25 || hitLoc.Y >= this->GetActorLocation().Y + 25 &&!bEstaMorto)
 	{
 
 	this->GetController()->SetControlRotation(newRot);
@@ -147,6 +213,7 @@ void APlayerTPS::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	PlayerInputComponent->BindAxis("MoverDireita", this, &APlayerTPS::MoverDireita);
 	PlayerInputComponent->BindAction("Atirar", EInputEvent::IE_Pressed, this, &APlayerTPS::Atirar);
 	PlayerInputComponent->BindAction("AndarPuppet", EInputEvent::IE_Pressed, this, &APlayerTPS::AndarPuppet);
+	PlayerInputComponent->BindAction("AtacarPuppet", EInputEvent::IE_Pressed, this, &APlayerTPS::AtacarPuppet);
 }
 
 

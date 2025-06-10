@@ -19,6 +19,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackRange = 2.0f; // Alcance do ataque corpo a corpo
+
 	UPROPERTY(EditAnywhere, Category = "Health")
 	float Health;
 
@@ -30,14 +33,28 @@ protected:
 
 	TSubclassOf<class APlayerTPS> PlayerTPS;
 
+	FTimerHandle TimerHandle;
+
+
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void AttackMelee();
+
 	APlayerTPS* FPlayerTPS;
+
+	UFUNCTION()
+	void ConjurarAtaque();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPodeAtacar;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	class USoundBase* SAtaquePuppet;
 
 };

@@ -21,8 +21,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Seta da Arma")
 	class UArrowComponent* SetaDaArma;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Fire();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPodeAtirar;
+
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -51,7 +56,7 @@ public:
 
 	FTimerHandle TimerHandle;
 
-	bool bPodeAtirar;
+
 
 	void FireRate();
 };

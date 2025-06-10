@@ -22,7 +22,7 @@ AEstacas::AEstacas()
 	// Use this component to drive this projectile's movement
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
-	ProjectileMovementComponent->InitialSpeed = 300.f;
+	ProjectileMovementComponent->InitialSpeed = 2000.f;
 	ProjectileMovementComponent->MaxSpeed = 3000.f;
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->bShouldBounce = true;
@@ -69,12 +69,12 @@ void AEstacas::FireInDirection(const FVector& ShootDirection)
 void AEstacas::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABotPersonagem* Alvo = Cast<ABotPersonagem>(OtherActor);
-	if (OtherActor )
+	if (OtherActor && OtherActor->ActorHasTag("Inimigo"))
 	{
-		Alvo->SetHealth(33);
-
+		Alvo->HitBesta();
+		Destroy();
 	}
-	//Destroy();
+
 	
 }
 
